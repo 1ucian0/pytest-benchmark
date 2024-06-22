@@ -145,6 +145,13 @@ def add_global_options(addoption, prefix='benchmark-'):
         default=False,
         help='Disable reporting. Verbose mode takes precedence.',
     )
+    addoption(
+        f'--timeout-skip-list',
+        metavar='NUM',
+        type=int,
+        default=0,
+        help='Checks if a test timeouts after n and adds it into the skip list, if given.',
+    )
     if not prefix:
         addoption(
             '--import-mode',
