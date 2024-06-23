@@ -53,6 +53,7 @@ class BenchmarkSession:
             'warmup': config.getoption('benchmark_warmup'),
             'warmup_iterations': config.getoption('benchmark_warmup_iterations'),
             'cprofile': bool(config.getoption('benchmark_cprofile')),
+            'timeout_skip_list': config.getoption('timeout_skip_list'),
         }
         self.skip = config.getoption('benchmark_skip')
         self.disabled = config.getoption('benchmark_disable') and not config.getoption('benchmark_enable')

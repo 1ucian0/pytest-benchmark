@@ -6,6 +6,7 @@ import time
 import traceback
 import typing
 from math import ceil
+import pytest
 
 from .timers import compute_timer_precision
 from .utils import NameWrapper
@@ -45,6 +46,7 @@ class BenchmarkFixture:
         disabled,
         cprofile,
         group=None,
+        timeout_skip_list=0,
     ):
         self.name = node.name
         self.fullname = node._nodeid
@@ -74,6 +76,8 @@ class BenchmarkFixture:
         self._mode = None
         self.cprofile = cprofile
         self.cprofile_stats = None
+        self.timeout_skip_list = timeout_skip_list
+        self.skipfile = 'skipfile.txt'
         self.stats = None
 
     @property
@@ -136,6 +140,13 @@ class BenchmarkFixture:
         if self._mode:
             self.has_error = True
             raise FixtureAlreadyUsed('Fixture can only be used once. Previously it was used in %s mode.' % self._mode)
+
+        if self.skipfile:
+            self._check_skip()
+
+        if self.timeout_skip_list:
+            self._check_timeout(function_to_benchmark, args, kwargs)
+
         try:
             self._mode = 'benchmark(...)'
             return self._raw(function_to_benchmark, *args, **kwargs)
@@ -143,6 +154,30 @@ class BenchmarkFixture:
             self.has_error = True
             raise
 
+    def _check_skip(self):
+        try:
+            with open(self.skipfile, 'r') as file:
+                for line in file:
+                    if self.fullname in line:
+                        self.disabled = True
+                        pytest.skip(f"Included to {self.skipfile}")
+        except FileNotFoundError:
+            pass  # "No {self.skipfile}"
+
+    def _check_timeout(self, function_to_benchmark, args, kwargs):
+        from wrapt_timeout_decorator import timeout
+        func = timeout(self.timeout_skip_list)(function_to_benchmark)
+        try:
+            func(*args, **kwargs)
+        except TimeoutError:
+            self.disabled = True
+            pytest.skip(f"takes longer than {self.timeout_skip_list} secs. It will be included to {self.skipfile}")
+            with open(self.skipfile, 'a+') as file:
+                for line in file:
+                    if self.fullname in line:
+                        break
+                else:  # not found, we are at the eof
+                    file.write(self.fullname)  # append missing data
     def pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
         if self._mode:
             self.has_error = True
