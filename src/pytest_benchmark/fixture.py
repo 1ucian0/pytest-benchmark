@@ -171,13 +171,15 @@ class BenchmarkFixture:
             func(*args, **kwargs)
         except TimeoutError:
             self.disabled = True
-            pytest.skip(f"takes longer than {self.timeout_skip_list} secs. It will be included to {self.skipfile}")
             with open(self.skipfile, 'a+') as file:
                 for line in file:
                     if self.fullname in line:
                         break
                 else:  # not found, we are at the eof
                     file.write(self.fullname)  # append missing data
+            pytest.skip(f"takes longer than {self.timeout_skip_list} secs. It will be included to {self.skipfile}")
+
+
     def pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
         if self._mode:
             self.has_error = True
