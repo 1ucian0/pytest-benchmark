@@ -167,17 +167,17 @@ class BenchmarkFixture:
     def _check_timeout(self, function_to_benchmark, args, kwargs):
         from wrapt_timeout_decorator import timeout, set_subprocess_starting_method
         set_subprocess_starting_method('spawn')
-        func = timeout(self.timeout_skip_list)(function_to_benchmark)
+        func = timeout(dec_timeout=self.timeout_skip_list, use_signals=False)(function_to_benchmark)
         try:
             func(*args, **kwargs)
         except TimeoutError:
             self.disabled = True
             with open(self.skipfile, 'a+') as file:
                 for line in file:
-                    if self.fullname in line:
+                    if self.fullname in line:  # if already there, do not add it again
                         break
                 else:  # not found, we are at the eof
-                    file.write(self.fullname)  # append missing data
+                    file.write(self.fullname+'\n')  # append missing data
             pytest.skip(f"takes longer than {self.timeout_skip_list} secs. It will be included to {self.skipfile}")
 
 
