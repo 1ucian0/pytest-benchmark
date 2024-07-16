@@ -165,7 +165,8 @@ class BenchmarkFixture:
             pass  # "No {self.skipfile}"
 
     def _check_timeout(self, function_to_benchmark, args, kwargs):
-        from wrapt_timeout_decorator import timeout
+        from wrapt_timeout_decorator import timeout, set_subprocess_starting_method
+        set_subprocess_starting_method('fork')
         func = timeout(dec_timeout=self.timeout_skip_list, use_signals=False)(function_to_benchmark)
         try:
             func(*args, **kwargs)
