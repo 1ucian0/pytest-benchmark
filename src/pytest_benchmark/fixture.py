@@ -178,7 +178,9 @@ class BenchmarkFixture:
                         break
                 else:  # not found, we are at the eof
                     file.write(self.fullname+'\n')  # append missing data
-            pytest.skip(f"takes longer than {self.timeout_skip_list} secs. It will be included to {self.skipfile}")
+            pytest.fail(reason=f"takes longer than {self.timeout_skip_list} secs. It will be included "
+                               f"to {self.skipfile}",
+                        pytrace=False)
 
 
     def pedantic(self, target, args=(), kwargs=None, setup=None, rounds=1, warmup_rounds=0, iterations=1):
