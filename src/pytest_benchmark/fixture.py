@@ -21,6 +21,8 @@ else:
     statistics_error = None
     from .stats import Metadata
 
+from wrapt_timeout_decorator import set_subprocess_starting_method
+set_subprocess_starting_method('fork')
 
 class FixtureAlreadyUsed(Exception):
     pass
