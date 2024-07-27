@@ -162,7 +162,7 @@ class BenchmarkFixture:
                 for line in file:
                     if self.fullname in line:
                         self.disabled = True
-                        pytest.xfail(reason=f"Included to {self.skipfile}")
+                        pytest.fail(reason=f"Included in {self.skipfile}", pytrace=False)
         except FileNotFoundError:
             pass  # "No {self.skipfile}"
 
