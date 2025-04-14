@@ -168,7 +168,7 @@ class BenchmarkFixture:
 
     def _check_timeout(self, function_to_benchmark, args, kwargs):
         from wrapt_timeout_decorator import timeout
-        func = timeout(dec_timeout=self.timeout_skip_list, use_signals=False)(function_to_benchmark)
+        func = timeout(dec_timeout=self.timeout_skip_list, use_signals=True)(function_to_benchmark)
         try:
             func(*args, **kwargs)
         except TimeoutError:
